@@ -1,0 +1,88 @@
+version: "3.8"
+
+services:
+    be20092731:
+        image: tranquanghuyiy09/report-docker-compose:ibe20092731
+        container_name: cbe20092731
+        restart: always
+        environment:
+            - PGUSER=admin
+            - PGPASSWORD=admin
+            - PGDATABASE=db20092731
+            - PGHOST=cpg20092731
+            - PGPORT=5432
+        ports:
+            - "5555:80"
+        networks:
+            - netbepg20092731
+
+    postgres:
+        image: postgres
+        container_name: cpg20092731
+        restart: always
+        environment:
+            - POSTGRES_USER=admin
+            - POSTGRES_PASSWORD=admin
+            - POSTGRES_DB=db20092731
+        volumes:
+            - vol20092731:/var/lib/postgresql/data
+            - ./dt20092731/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+        ports:
+            - "5432:5432"
+        networks:
+            - netbepg20092731
+            - netadpg20092731
+            - netlitepg20092731
+
+    adminer:
+        image: adminer
+        container_name: cad20092731
+        restart: always
+        ports:
+            - "8080:8080"
+        networks:
+            - netadpg20092731
+    
+    lite20092731:
+        image: tranquanghuyiy09/report-docker-compose:ilite20092731
+        container_name: clite20092731
+        restart: always
+        environment:
+            - PGUSER=admin
+            - PGPASSWORD=admin
+            - PGDATABASE=db20092731
+            - PGHOST=cpg20092731
+            - PGPORT=5432
+        ports:
+            - "8888:5000"
+        networks:
+            - netlitepg20092731
+
+    huyprofile:
+        image: tranquanghuyiy09/report-docker-compose:ihuyprofile
+        container_name: huy-con
+        restart: always
+        ports:
+            - '9999:80'
+
+    nginx-proxy:
+        image: nginx:alpine
+        container_name: nginx-proxy
+        restart: always
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        ports:
+            - "80:80"
+        links:
+            - be20092731
+            - lite20092731
+            - huyprofile
+
+volumes:
+    vol20092731:
+
+networks:
+    netbepg20092731:
+    netlitepg20092731:
+    netadpg20092731:
+
